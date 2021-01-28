@@ -1,4 +1,4 @@
 class BookReview < ApplicationRecord
   belongs_to :book
-  # rating can't be nil
+  validates_presence_of :rating
 end

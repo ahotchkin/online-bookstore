@@ -4,8 +4,7 @@ class Book < ApplicationRecord
   has_many :book_reviews
   has_many :book_formats
   has_many :book_format_types, through: :book_formats
-
-  # title, publisher_id, author_id are all required
+  validates_presence_of :title
 
   # remamed to book_format_type as calling this book_format_types produces an error since that is an attribute of self
   def book_format_type
@@ -36,7 +35,7 @@ class Book < ApplicationRecord
       # :book_format_physical (defaults to nil). If supplied as true or false, only return books that are available in a format whose “physical” field matches the supplied argument. This filter is not applied if the argument is not present or nil.
     # The title_only and book_format options are not exclusive of each other, so Book.search('Karamazov', title_only: true, book_format_physical: true) should return all physical books whose title matches that term.
 
-    self.sort_by_average_rating.select { |book| book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase) && book.book_format_type_ids.include?(options[:book_format_type_id] if options[:book_format_type_id]}
+    # self.sort_by_average_rating.select { |book| book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase) && book.book_format_type_ids.include?(options[:book_format_type_id] if options[:book_format_type_id]}
 
 
 
