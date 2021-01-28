@@ -35,5 +35,43 @@ class Book < ApplicationRecord
       # :book_format_type_id (defaults to nil). If supplied, only return books that are available in a format that matches the supplied type id.
       # :book_format_physical (defaults to nil). If supplied as true or false, only return books that are available in a format whose “physical” field matches the supplied argument. This filter is not applied if the argument is not present or nil.
     # The title_only and book_format options are not exclusive of each other, so Book.search('Karamazov', title_only: true, book_format_physical: true) should return all physical books whose title matches that term.
+
+    self.sort_by_average_rating.select { |book| book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase) && book.book_format_type_ids.include?(options[:book_format_type_id] if options[:book_format_type_id]}
+
+
+
+    # I want to be able to find the options I have and ignore if they are nil
+    # can I filter array returned in else statement based on options that are not nil?
+    # puts options[:book_format_physical]
+    # self.sort_by_average_rating.select do |book|
+    #   if options
+    #     if options[:title_only] = true
+    #       book.title.downcase.include?(query.downcase)
+    #     elsif options[:book_format_type_id]
+    #       book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase) && book.book_format_type_ids.include?(options[:book_format_type_id])
+    #     elsif options[:book_format_phsyical]
+    #       book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase) && book.book_format_types.collect { |book_format_type| book_format_type.physical == options[:book_format_physical] }.include?(true)
+    #     else
+    #       book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase)
+    #     end
+    #   end
+    # end
+
+    # title_only
+    # book_format_type_id
+    # book_format_physical
+
+    # title_only & book_format_type_id
+    # title_only & book_format_phsyical
+    # book_format_type_id & book_format_physical
+
+    # title_only & book_format_type_id & book_format_physical
+
+
   end
+
+  def self.sort_by_average_rating
+    self.all.sort_by(&:average_rating).reverse
+  end
+
 end
