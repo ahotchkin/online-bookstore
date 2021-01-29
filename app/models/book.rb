@@ -23,7 +23,7 @@ class Book < ApplicationRecord
     (ratings_array.sum.to_f / ratings_array.length.to_f).round(1)
   end
 
-  def self.search(query, options)
+  def self.search(query, options = nil)
     # Returns a collection of books that match the query string, subject to the following rules:
       # 1. If the last name of the author matches the query string exactly (case insensitive)
       # 2. If the name of the publisher matches the query string exactly (case insensitive)
@@ -43,28 +43,53 @@ class Book < ApplicationRecord
     # can I filter array returned in else statement based on options that are not nil?
     # puts options[:book_format_physical]
     # self.sort_by_average_rating.select do |book|
-    #   if options
-    #     if options[:title_only] = true
-    #       book.title.downcase.include?(query.downcase)
-    #     elsif options[:book_format_type_id]
-    #       book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase) && book.book_format_type_ids.include?(options[:book_format_type_id])
-    #     elsif options[:book_format_phsyical]
-    #       book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase) && book.book_format_types.collect { |book_format_type| book_format_type.physical == options[:book_format_physical] }.include?(true)
-    #     else
-    #       book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase)
-    #     end
+    #   if options == nil
+    #     book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase)
+    #   elsif options[:title_only] = true
+    #     book.title.downcase.include?(query.downcase)
+    #   elsif options[:book_format_type_id]
+    #     book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase) && book.book_format_type_ids.include?(options[:book_format_type_id])
+    #   elsif options[:book_format_phsyical]
+    #     book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase) && book.book_format_types.collect { |book_format_type| book_format_type.physical == options[:book_format_physical] }.include?(true)
+    #   elsif options[:title_only] && options[:book_format_type_id]
+    #     book.title.downcase.include?(query.downcase) && book.book_format_type_ids.include?(options[:book_format_type_id])
+    #   elsif options[:title_only] && options[:book_format_phsyical]
+    #     book.title.downcase.include?(query.downcase) && book.book_format_types.collect { |book_format_type| book_format_type.physical == options[:book_format_physical] }.include?(true)
     #   end
     # end
 
-    # title_only
-    # book_format_type_id
-    # book_format_physical
+    self.sort_by_average_rating.select do |book|
+      book_by_query = book.author.last_name.downcase == query.downcase || book.publisher.name.downcase == query.downcase || book.title.downcase.include?(query.downcase)
+      book_by_title = book.title.downcase.include?(query.downcase)
 
-    # title_only & book_format_type_id
-    # title_only & book_format_phsyical
-    # book_format_type_id & book_format_physical
+      case options
+      when nil
+        book_by_query
+      when options[:title_only] = true
+        book_by_title
+      when options[:book_format_type_id]
+        book_by_query && book.book_format_type_ids.include?(options[:book_format_type_id])
+      when options[:book_format_phsyical]
+        book_by_query && book.book_format_types.collect { |book_format_type| book_format_type.physical == options[:book_format_physical] }.include?(true)
+      when options[:title_only] && options[:book_format_type_id]
+        book_by_title && book.book_format_type_ids.include?(options[:book_format_type_id])
+      when options[:title_only] && options[:book_format_phsyical]
+        book_by_title && book.book_format_types.collect { |book_format_type| book_format_type.physical == options[:book_format_physical] }.include?(true)
+      end
+    end
 
-    # title_only & book_format_type_id & book_format_physical
+
+    # option combinations:
+      # title_only
+      # book_format_type_id
+      # book_format_physical
+
+      # title_only & book_format_type_id
+      # title_only & book_format_phsyical
+
+      # below combinations are not needed - if you have book_format_type_id there is no need to specify book_format_physical
+        # book_format_type_id & book_format_physical
+        # title_only & book_format_type_id & book_format_physical
 
 
   end
